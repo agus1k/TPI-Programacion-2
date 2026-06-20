@@ -1,8 +1,12 @@
 package integrado.prog2.service;
 
 import integrado.prog2.entities.Pedido;
+import integrado.prog2.entities.Producto;
+import integrado.prog2.entities.Usuario;
 import integrado.prog2.enums.Estado;
 import integrado.prog2.enums.FormaPago;
+import integrado.prog2.exception.EntidadNoEncontradaException;
+import integrado.prog2.exception.StockInvalidoException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,29 +26,82 @@ public class PedidoService {
     }
 
     public List<Pedido> listar() {
-        // TODO: solo no eliminados (HU-PED-01).
-        return new ArrayList<>();
+        List<Pedido> resultado = new ArrayList<>();
+        for (Pedido p : pedidos) {
+            if (!p.isEliminado()) {
+                resultado.add(p);
+            }
+        }
+        if (resultado.isEmpty()) {
+            System.out.println("No hay pedidos para mostrar.");
+        }
+        return resultado;
     }
 
     public Pedido crear(Long usuarioId, FormaPago formaPago, List<DetalleInput> items) {
-        // TODO (HU-PED-02):
-        //  1) buscar usuario por id; si no existe o está eliminado -> EntidadNoEncontradaException.
-        //  2) crear Pedido(usuario, formaPago).
-        //  3) por cada item: buscar producto y usar pedido.addDetallePedido(cantidad, producto.getPrecio(), producto).
-        //     - si alguna operación falla (ej. sin stock), capturar la excepción y NO agregar el pedido a la colección
-        //       para no dejar datos inconsistentes.
-        //  4) usar pedido.calcularTotal() (interfaz Calculable) para fijar el total.
-        //  5) asignar id, agregar a colección y devolver.
-        return null;
+        Usuario usuario = usuarioService.buscarPorId(usuarioId);
+        if (usuario == null || usuario.isEliminado()) {
+            throw new EntidadNoEncontradaException("No existe un usuario con ID " + usuarioId + ".");
+        }
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("El pedido debe tener al menos un producto.");
+        }
+
+        // primera pasada: validar todo antes de tocar stock, para no dejar el pedido a medio crear
+        for (DetalleInput item : items) {
+            Producto producto = productoService.buscarPorId(item.productoId());
+            if (producto == null || producto.isEliminado()) {
+                throw new EntidadNoEncontradaException("No existe un producto con ID " + item.productoId() + ".");
+            }
+            if (item.cantidad() <= 0) {
+                throw new IllegalArgumentException("La cantidad debe ser mayor a cero.");
+            }
+            if (producto.getStock() < item.cantidad()) {
+                throw new StockInvalidoException("Stock insuficiente para " + producto.getNombre() + ".");
+            }
+        }
+
+        Pedido pedido = new Pedido(usuario, formaPago);
+        for (DetalleInput item : items) {
+            Producto producto = productoService.buscarPorId(item.productoId());
+            pedido.addDetallePedido(item.cantidad(), producto.getPrecio(), producto);
+        }
+        pedido.calcularTotal();
+        pedido.setId(secuenciaId++);
+        pedidos.add(pedido);
+        usuario.getPedidos().add(pedido);
+        return pedido;
     }
 
     public Pedido actualizarEstadoYFormaPago(Long pedidoId, Estado nuevoEstado, FormaPago nuevaFormaPago) {
-        // TODO (HU-PED-03): buscar pedido, validar y actualizar.
-        return null;
+        Pedido pedido = buscarPorId(pedidoId);
+        if (pedido == null || pedido.isEliminado()) {
+            throw new EntidadNoEncontradaException("No existe un pedido con ID " + pedidoId + ".");
+        }
+        if (nuevoEstado != null) {
+            pedido.setEstado(nuevoEstado);
+        }
+        if (nuevaFormaPago != null) {
+            pedido.setFormaPago(nuevaFormaPago);
+        }
+        return pedido;
     }
 
     public void eliminar(Long id) {
-        // TODO (HU-PED-04): soft delete del pedido (y opcionalmente de sus detalles).
+        Pedido pedido = buscarPorId(id);
+        if (pedido == null || pedido.isEliminado()) {
+            throw new EntidadNoEncontradaException("No existe un pedido con ID " + id + ".");
+        }
+        pedido.setEliminado(true);
+    }
+
+    public Pedido buscarPorId(Long id) {
+        for (Pedido p : pedidos) {
+            if (p.getId().equals(id)) {
+                return p;
+            }
+        }
+        return null;
     }
 
     // Tipo auxiliar para que la UI pase los items sin acoplar entidades.

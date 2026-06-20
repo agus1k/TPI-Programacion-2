@@ -25,7 +25,7 @@ public class Usuario extends Base {
     public Usuario(String nombre, String apellido, String mail,
                    String celular, String contrasena, Rol rol) {
         this();
-        // TODO: la unicidad del mail se valida en el Service (recorriendo la colección).
+        // la unicidad del mail se valida en UsuarioService (recorriendo la colección)
         this.nombre = nombre;
         this.apellido = apellido;
         this.mail = mail;
@@ -57,7 +57,6 @@ public class Usuario extends Base {
 
     @Override
     public String toString() {
-        // TODO: ajustar para HU-USR-01 (id, nombre, apellido, mail, rol).
         return "Usuario{id=" + getId() + ", nombre='" + nombre + "', apellido='" + apellido +
                 "', mail='" + mail + "', rol=" + rol + "}";
     }

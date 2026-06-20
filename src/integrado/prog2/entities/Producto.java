@@ -19,7 +19,7 @@ public class Producto extends Base {
     public Producto(String nombre, Double precio, String descripcion,
                     Integer stock, String imagen, boolean disponible, Categoria categoria) {
         this();
-        // TODO: validar precio >= 0 y stock >= 0 acá o en el Service (lanzar PrecioInvalidoException / StockInvalidoException).
+        // precio >= 0 y stock >= 0 se validan en ProductoService antes de llegar acá
         this.nombre = nombre;
         this.precio = precio;
         this.descripcion = descripcion;
@@ -52,7 +52,6 @@ public class Producto extends Base {
 
     @Override
     public String toString() {
-        // TODO: ajustar formato para listado (HU-PROD-01) — incluir id, nombre, precio, stock y categoría.
         return "Producto{id=" + getId() + ", nombre='" + nombre + "', precio=" + precio +
                 ", stock=" + stock + ", categoria=" + (categoria != null ? categoria.getNombre() : "-") + "}";
     }

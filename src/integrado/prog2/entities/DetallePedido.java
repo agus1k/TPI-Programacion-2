@@ -14,7 +14,7 @@ public class DetallePedido extends Base {
 
     public DetallePedido(Integer cantidad, Double subtotal, Producto producto) {
         this();
-        // TODO: validar cantidad > 0 (lanzar excepción si no).
+        // la validación de cantidad > 0 vive en Pedido.addDetallePedido, único punto de creación
         this.cantidad = cantidad;
         this.subtotal = subtotal;
         this.producto = producto;

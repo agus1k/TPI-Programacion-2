@@ -1,6 +1,10 @@
 package integrado.prog2.service;
 
+import integrado.prog2.entities.Categoria;
 import integrado.prog2.entities.Producto;
+import integrado.prog2.exception.EntidadNoEncontradaException;
+import integrado.prog2.exception.PrecioInvalidoException;
+import integrado.prog2.exception.StockInvalidoException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +14,6 @@ public class ProductoService {
 
     private final List<Producto> productos = new ArrayList<>();
     private long secuenciaId = 1L;
-
     private final CategoriaService categoriaService;
 
     public ProductoService(CategoriaService categoriaService) {
@@ -19,36 +22,97 @@ public class ProductoService {
     }
 
     public List<Producto> listar() {
-        // TODO: solo no eliminados (HU-PROD-01).
-        return new ArrayList<>();
+        
+        List<Producto> productosActivos = new ArrayList<>();
+        for (Producto p : productos ) {
+            if (!p.isEliminado()) {
+                productosActivos.add(p);
+            }
+        }
+        if (productosActivos.isEmpty()) {
+            System.out.println("No hay productos disponibles.");
+        }
+        return productosActivos;
     }
 
     public Producto crear(String nombre, String descripcion, Double precio,
                           Integer stock, String imagen, boolean disponible, Long categoriaId) {
-        // TODO:
-        //  1) validar nombre no vacío.
-        //  2) validar precio >= 0 (PrecioInvalidoException).
-        //  3) validar stock >= 0 (StockInvalidoException).
-        //  4) buscar categoría por id usando categoriaService; si no existe o está eliminada, cancelar.
-        //  5) crear Producto, asignar id, agregar a colección.
-        return null;
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre no puede estar vacío.");
+        }
+        if (precio == null || precio < 0) {
+            throw new PrecioInvalidoException("El precio no puede ser negativo.");
+        }
+        if (stock == null || stock < 0) {
+            throw new StockInvalidoException("El stock no puede ser negativo.");
+        }
+        Categoria categoria = categoriaService.buscarPorId(categoriaId);
+        if (categoria == null || categoria.isEliminado()) {
+            throw new EntidadNoEncontradaException("No existe una categoría con ID " + categoriaId + ".");
+        }
+        Producto producto = new Producto(nombre, precio, descripcion, stock, imagen, disponible, categoria);
+        producto.setId(secuenciaId++);
+        productos.add(producto);
+        categoria.getProductos().add(producto);
+        return producto;
     }
 
     public Producto editar(Long id, String nombre, String descripcion, Double precio,
                            Integer stock, String imagen, Boolean disponible, Long categoriaId) {
-        // TODO:
-        //  - buscar producto por id (no eliminado); si no existe -> EntidadNoEncontradaException.
-        //  - actualizar solo los campos que vienen no nulos / no vacíos.
-        //  - revalidar precio/stock.
-        return null;
+        Producto producto = buscarPorId(id);
+        if (producto == null || producto.isEliminado()) {
+            throw new EntidadNoEncontradaException("No existe un producto con ID " + id + ".");
+        }
+        if (nombre != null && !nombre.isBlank()) {
+            producto.setNombre(nombre);
+        }
+        if (descripcion != null && !descripcion.isBlank()) {
+            producto.setDescripcion(descripcion);
+        }
+        if (precio != null) {
+            if (precio < 0) {
+                throw new PrecioInvalidoException("El precio no puede ser negativo.");
+            }
+            producto.setPrecio(precio);
+        }
+        if (stock != null) {
+            if (stock < 0) {
+                throw new StockInvalidoException("El stock no puede ser negativo.");
+            }
+            producto.setStock(stock);
+        }
+        if (imagen != null && !imagen.isBlank()) {
+            producto.setImagen(imagen);
+        }
+        if (disponible != null) {
+            producto.setDisponible(disponible);
+        }
+        if (categoriaId != null) {
+            Categoria nuevaCategoria = categoriaService.buscarPorId(categoriaId);
+            if (nuevaCategoria == null || nuevaCategoria.isEliminado()) {
+                throw new EntidadNoEncontradaException("No existe una categoría con ID " + categoriaId + ".");
+            }
+            producto.getCategoria().getProductos().remove(producto);
+            producto.setCategoria(nuevaCategoria);
+            nuevaCategoria.getProductos().add(producto);
+        }
+        return producto;
     }
 
     public void eliminar(Long id) {
-        // TODO: soft delete (HU-PROD-04). No remover físicamente para no romper detalles de pedidos.
+        Producto producto = buscarPorId(id);
+        if (producto == null || producto.isEliminado()) {
+            throw new EntidadNoEncontradaException("No existe un producto con ID " + id + ".");
+        }
+        producto.setEliminado(true);
     }
 
     public Producto buscarPorId(Long id) {
-        // TODO: helper para PedidoService al armar detalles.
+        for (Producto p : productos) {
+            if (p.getId().equals(id)) {
+                return p;
+            }
+        }
         return null;
     }
 }

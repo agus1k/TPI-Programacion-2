@@ -13,6 +13,7 @@ public class Categoria extends Base {
 
     public Categoria(Long id, String nombre, String descripcion) {
         super(id); // le pasa el id al constructor de Base
+        this.productos = new ArrayList<>();
         this.nombre = nombre;
         this.descripcion = descripcion;
     }
@@ -28,8 +29,6 @@ public class Categoria extends Base {
         this.descripcion = descripcion;
     }
 
-    // TODO: método helper addProducto(Producto p) si querés mantener sincronizada la relación bidireccional.
-
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
@@ -41,7 +40,6 @@ public class Categoria extends Base {
 
     @Override
     public String toString() {
-        // TODO: ajustar formato para el listado de consola (HU-CAT-01).
         return "Categoria{id=" + getId() + ", nombre='" + nombre + "', descripcion='" + descripcion + "'}";
     }
 }

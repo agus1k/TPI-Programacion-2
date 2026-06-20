@@ -2,6 +2,7 @@ package integrado.prog2.entities;
 
 import integrado.prog2.enums.Estado;
 import integrado.prog2.enums.FormaPago;
+import integrado.prog2.exception.StockInvalidoException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class Pedido extends Base implements Calculable {
     private FormaPago formaPago;
     private Usuario usuario;
     private List<DetallePedido> detalles;
+    private long secuenciaDetalle = 1L;
 
     public Pedido() {
         super();
@@ -29,7 +31,9 @@ public class Pedido extends Base implements Calculable {
 
     public Pedido(Usuario usuario, FormaPago formaPago) {
         this();
-        // TODO: validar que usuario != null (regla: no se puede crear Pedido sin usuario).
+        if (usuario == null) {
+            throw new IllegalArgumentException("El pedido debe estar asociado a un usuario.");
+        }
         this.usuario = usuario;
         this.formaPago = formaPago;
     }
@@ -37,27 +41,50 @@ public class Pedido extends Base implements Calculable {
     // Métodos propios pedidos por el UML:
 
     public void addDetallePedido(int cantidad, Double precioUnitario, Producto producto) {
-        // TODO:
-        //  1) validar cantidad > 0 (lanzar StockInvalidoException o similar).
-        //  2) validar stock disponible del producto.
-        //  3) calcular subtotal = cantidad * precioUnitario.
-        //  4) crear DetallePedido y agregarlo a la lista.
-        //  5) (opcional) descontar stock del producto.
+        if (producto == null) {
+            throw new IllegalArgumentException("El producto no puede ser nulo.");
+        }
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor a cero.");
+        }
+        if (producto.getStock() < cantidad) {
+            throw new StockInvalidoException("Stock insuficiente para " + producto.getNombre() +
+                    ". Disponible: " + producto.getStock() + ".");
+        }
+        Double subtotal = precioUnitario * cantidad;
+        DetallePedido detalle = new DetallePedido(cantidad, subtotal, producto);
+        detalle.setId(secuenciaDetalle++);
+        this.detalles.add(detalle);
+        producto.setStock(producto.getStock() - cantidad);
     }
 
     public DetallePedido findeDetallePedidoByProducto(Producto producto) {
-        // TODO: recorrer detalles y devolver el que tenga ese producto, o null / lanzar excepción si no existe.
+        for (DetallePedido d : detalles) {
+            if (d.getProducto().equals(producto)) {
+                return d;
+            }
+        }
         return null;
     }
 
     public void deleteDetallePedidoByProducto(Producto producto) {
-        // TODO: buscar detalle por producto y removerlo de la colección.
+        DetallePedido[] copia = detalles.toArray(new DetallePedido[0]);
+        for (DetallePedido d : copia) {
+            if (d.getProducto().equals(producto)) {
+                d.getProducto().setStock(d.getProducto().getStock() + d.getCantidad());
+                detalles.remove(d);
+            }
+        }
     }
 
     @Override
     public Double calcularTotal() {
-        // TODO: recorrer detalles y sumar subtotales. Asignar a this.total y devolverlo.
-        return 0.0;
+        double suma = 0.0;
+        for (DetallePedido d : detalles) {
+            suma += d.getSubtotal();
+        }
+        this.total = suma;
+        return this.total;
     }
 
     public LocalDate getFecha() { return fecha; }
@@ -80,7 +107,6 @@ public class Pedido extends Base implements Calculable {
 
     @Override
     public String toString() {
-        // TODO: ajustar para HU-PED-01 (id, usuario, estado, formaPago, total, fecha).
         return "Pedido{id=" + getId() +
                 ", usuario=" + (usuario != null ? usuario.getMail() : "-") +
                 ", estado=" + estado +
