@@ -1,10 +1,9 @@
 package integrado.prog2.ui;
-
+import integrado.prog2.entities.Categoria;
 import integrado.prog2.service.CategoriaService;
 import integrado.prog2.service.PedidoService;
 import integrado.prog2.service.ProductoService;
 import integrado.prog2.service.UsuarioService;
-
 import java.util.Scanner;
 
 // Menú principal de consola. Solo se encarga de la interacción con el usuario
@@ -46,12 +45,12 @@ public class Menu {
             String input = scanner.nextLine();
             // TODO: parsear input y manejar opciones inválidas.
             switch (input) {
-                case "1" -> menuCategorias();
-                case "2" -> menuProductos();
-                case "3" -> menuUsuarios();
-                case "4" -> menuPedidos();
-                case "0" -> salir = true;
-                default -> System.out.println("Opción inválida.");
+                case "1" : menuCategorias();
+                case "2" : menuProductos();
+                case "3" : menuUsuarios();
+                case "4" : menuPedidos();
+                case "0" : salir = true;
+                default : System.out.println("Opción inválida.");
             }
         }
         System.out.println("¡Hasta luego!");
@@ -59,6 +58,49 @@ public class Menu {
 
     private void menuCategorias() {
         // TODO: submenú 1.Listar 2.Crear 3.Editar 4.Eliminar 0.Volver
+            boolean salir = false;
+        while (!salir) {
+            System.out.println();
+            System.out.println("=== CATEGORIAS ===");
+            System.out.println("1. Listar");
+            System.out.println("2. Crear");
+            System.out.println("3. Editar");
+            System.out.println("4. Eliminar");
+            System.out.println("0. Volver");
+            System.out.print("Seleccione: ");
+
+            String input = scanner.nextLine();
+            switch (input) {
+                case "1" : categoriaService.listar();
+                    break;
+                case "2" : 
+                    System.out.print("Ingrese el nombre de la categoría: ");
+                    String nombre = scanner.nextLine();
+                    System.out.print("Ingrese la descripción de la categoría: ");
+                    String descripcion = scanner.nextLine();
+                    Categoria categoria = categoriaService.crear(nombre, descripcion);
+                    System.out.println("Categoría creada: " + categoria + " El ID asignado es: " + categoria.getId());
+                    break;
+                case "3" : 
+                    System.out.print("Ingrese el ID de la categoría a editar: ");
+                    Long id = Long.valueOf(scanner.nextLine());
+                    System.out.print("Ingrese el nuevo nombre de la categoría: ");
+                    String nuevoNombre = scanner.nextLine();
+                    System.out.print("Ingrese la nueva descripción de la categoría: ");
+                    String nuevaDescripcion = scanner.nextLine();
+                    Categoria categoria = categoriaService.editar(id, nuevoNombre, nuevaDescripcion);
+                    System.out.println("Categoría editada: " + categoria);
+                    break;
+                 case "4" : 
+                    System.out.print("Ingrese el ID de la categoría a eliminar: ");
+                    Long id = Long.valueOf(scanner.nextLine());
+                    categoriaService.eliminar(id);
+                    System.out.println("Categoría eliminada.");
+                    break;
+                case "0" : salir = true;
+                default : System.out.println("Opción inválida.");
+            }
+        }  
         //  Usar categoriaService y mostrar mensajes claros (éxito / error).
     }
 

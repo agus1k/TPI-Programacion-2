@@ -1,7 +1,6 @@
 package integrado.prog2.service;
 
 import integrado.prog2.entities.Categoria;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,23 +12,61 @@ public class CategoriaService {
     private long secuenciaId = 1L;
 
     public List<Categoria> listar() {
-        // TODO: devolver solo las categorías con eliminado == false (HU-CAT-01).
-        return new ArrayList<>();
+        List<Categoria> resultado = new ArrayList<>();
+        for (Categoria c : categorias) {
+            if (!c.isEliminado()) {
+                resultado.add(c);
+            }
+        }
+        if (resultado.isEmpty()) {
+            System.out.println("No hay categorías para mostrar.");
+        }
+        return resultado;
     }
 
     public Categoria crear(String nombre, String descripcion) {
-        // TODO:
         //  1) validar nombre/descripcion no vacíos.
         //  2) validar que no exista otra categoría con el mismo nombre (HU-CAT-02).
         //  3) crear Categoria, asignar id (secuenciaId++), agregar a la colección y devolver.
-        return null;
+        if (nombre == null || nombre.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre no puede estar vacío.");
+        }
+        if (descripcion == null || descripcion.trim().isEmpty()) {
+            throw new IllegalArgumentException("La descripción no puede estar vacía.");
+        }
+        //  2) validar que no exista otra categoría con el mismo nombre (HU-CAT-02).
+        for (Categoria c : categorias) {
+            if (!c.isEliminado() && c.getNombre().equals(nombre)) {
+                throw new IllegalArgumentException("Ya existe una categoría con ese nombre.");
+            }
+        }
+        Categoria categoria = new Categoria(secuenciaId++, nombre, descripcion);
+        categorias.add(categoria);
+        
+        return categoria;
     }
 
     public Categoria editar(Long id, String nuevoNombre, String nuevaDescripcion) {
         // TODO:
         //  1) buscar por id (no eliminada); si no existe -> EntidadNoEncontradaException.
         //  2) actualizar nombre y/o descripcion.
-        return null;
+        Categoria categoria = buscarPorId(id);
+        if (categoria == null || categoria.isEliminado()) {
+            throw new IllegalArgumentException("Categoría no encontrada.");
+        }
+            if (nuevoNombre != null && !nuevoNombre.trim().isEmpty()) {
+                // Validar que no exista otra categoría con el mismo nombre.
+                for (Categoria c : categorias) {
+                    if (!c.isEliminado() && c.getNombre().equals(nuevoNombre) && !c.getId().equals(id)) {
+                        throw new IllegalArgumentException("Ya existe una categoría con ese nombre.");
+                    }
+                }
+                categoria.setNombre(nuevoNombre);
+            }
+            if (nuevaDescripcion != null && !nuevaDescripcion.trim().isEmpty()) {
+                categoria.setDescripcion(nuevaDescripcion);
+            }
+        return categoria;
     }
 
     public void eliminar(Long id) {
@@ -37,10 +74,20 @@ public class CategoriaService {
         //  1) buscar por id; si no existe -> EntidadNoEncontradaException.
         //  2) soft delete: setEliminado(true).
         //  3) (regla de cátedra) decidir qué pasa si tiene productos asociados.
+        Categoria categoria = buscarPorId(id);
+        if (categoria == null || categoria.isEliminado()) {
+            throw new IllegalArgumentException("Categoría no encontrada.");
+        }
+        categoria.setEliminado(true);
     }
 
     public Categoria buscarPorId(Long id) {
         // TODO: helper para que ProductoService valide la categoría al crear/editar producto.
+            for (Categoria c : categorias) {
+                if (c.getId().equals(id)) {
+                    return c;
+                }
+            }
         return null;
     }
 }

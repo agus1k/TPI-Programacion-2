@@ -11,6 +11,12 @@ public class Categoria extends Base {
     private String descripcion;
     private List<Producto> productos;
 
+    public Categoria(Long id, String nombre, String descripcion) {
+        super(id); // le pasa el id al constructor de Base
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
+
     public Categoria() {
         super();
         this.productos = new ArrayList<>();
