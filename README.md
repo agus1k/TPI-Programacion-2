@@ -17,8 +17,6 @@ javac -d out $(find src -name "*.java")
 java -cp out integrado.prog2.Main
 ```
 
-Si usás IntelliJ, el `.iml` ya está armado, así que abrís la carpeta y le das directamente a Run sobre `Main.java`.
-
 ## Qué hace
 
 Es un menú con cuatro módulos (Categorías, Productos, Usuarios, Pedidos), y cada uno con su CRUD de toda la vida: listar, crear, editar, eliminar.
@@ -46,9 +44,3 @@ src/integrado/prog2/
 ```
 
 La idea fue separar bien las capas: las entidades no validan nada de negocio (eso vive en los Services), y el Menu no tiene ninguna regla, solo pide datos y muestra resultados.
-
-## Pendiente para la entrega
-
-- [ ] Grabar el video demostrativo
-- [ ] Armar el PDF de documentación
-- [ ] Pegar acá los links al repo y al video
