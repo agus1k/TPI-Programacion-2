@@ -1,6 +1,7 @@
 package integrado.prog2.service;
 
 import integrado.prog2.entities.Categoria;
+import integrado.prog2.entities.Producto;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,8 +70,7 @@ public class CategoriaService {
         return categoria;
     }
 
-    public void eliminar(Long id) {
-        // TODO:
+    public void eliminar(Long id) { 
         //  1) buscar por id; si no existe -> EntidadNoEncontradaException.
         //  2) soft delete: setEliminado(true).
         //  3) (regla de cátedra) decidir qué pasa si tiene productos asociados.
@@ -78,11 +78,19 @@ public class CategoriaService {
         if (categoria == null || categoria.isEliminado()) {
             throw new IllegalArgumentException("Categoría no encontrada.");
         }
-        categoria.setEliminado(true);
+         if (!categoria.getProductos().isEmpty()) {
+            System.out.println("La categoría tenía productos asociados. Se han eliminado junto con la categoría.");
+            for (Producto p : categoria.getProductos()) {
+                p.setEliminado(true);
+            }
+        }
+        else {
+            categoria.setEliminado(true);
+        }
+            
     }
 
     public Categoria buscarPorId(Long id) {
-        // TODO: helper para que ProductoService valide la categoría al crear/editar producto.
             for (Categoria c : categorias) {
                 if (c.getId().equals(id)) {
                     return c;

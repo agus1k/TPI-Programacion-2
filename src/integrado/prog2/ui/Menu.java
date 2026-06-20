@@ -78,8 +78,8 @@ public class Menu {
                     String nombre = scanner.nextLine();
                     System.out.print("Ingrese la descripción de la categoría: ");
                     String descripcion = scanner.nextLine();
-                    Categoria categoria = categoriaService.crear(nombre, descripcion);
-                    System.out.println("Categoría creada: " + categoria + " El ID asignado es: " + categoria.getId());
+                    Categoria categoriaCreada = categoriaService.crear(nombre, descripcion);
+                    System.out.println("Categoría creada: " + categoriaCreada + " El ID asignado es: " + categoriaCreada.getId());
                     break;
                 case "3" : 
                     System.out.print("Ingrese el ID de la categoría a editar: ");
@@ -88,14 +88,20 @@ public class Menu {
                     String nuevoNombre = scanner.nextLine();
                     System.out.print("Ingrese la nueva descripción de la categoría: ");
                     String nuevaDescripcion = scanner.nextLine();
-                    Categoria categoria = categoriaService.editar(id, nuevoNombre, nuevaDescripcion);
-                    System.out.println("Categoría editada: " + categoria);
+                    Categoria categoriaEditada = categoriaService.editar(id, nuevoNombre, nuevaDescripcion);
+                    System.out.println("Categoría editada: " + categoriaEditada);
                     break;
                  case "4" : 
                     System.out.print("Ingrese el ID de la categoría a eliminar: ");
-                    Long id = Long.valueOf(scanner.nextLine());
-                    categoriaService.eliminar(id);
-                    System.out.println("Categoría eliminada.");
+                    Long idEliminar = Long.valueOf(scanner.nextLine());
+                    System.out.println("¿Está seguro que desea eliminar la categoría con ID " + idEliminar + "? (s/n)");
+                    String confirmacion = scanner.nextLine();
+                    if (confirmacion.equalsIgnoreCase("s")) {
+                        categoriaService.eliminar(idEliminar);
+                        System.out.println("Categoría eliminada.");
+                    } else {
+                        System.out.println("Eliminación cancelada.");
+                    }
                     break;
                 case "0" : salir = true;
                 default : System.out.println("Opción inválida.");

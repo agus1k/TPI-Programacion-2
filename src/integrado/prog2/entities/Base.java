@@ -12,7 +12,7 @@ public abstract class Base {
     private LocalDateTime createdAt;
 
     protected Base() {
-        // TODO: inicializar eliminado=false y createdAt=LocalDateTime.now()
+        //inicializar eliminado=false y createdAt=LocalDateTime.now()
         this.eliminado = false;
         this.createdAt = LocalDateTime.now();
     }
@@ -46,7 +46,7 @@ public abstract class Base {
 
     @Override
     public String toString() {
-        // TODO: sobrescribir en cada clase hija con la info útil para listar en consola.
+        //sobrescribir en cada clase hija con la info útil para listar en consola.
         return "id=" + id + ", eliminado=" + eliminado;
     }
 }
